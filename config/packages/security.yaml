@@ -1,3 +1,10 @@
+parameters:
+    # Default local super-admin credentials:
+    # login: admin
+    # password: TempAdmin!2026
+    # Override this hash in production via ADMIN_PASSWORD_HASH.
+    app.default_admin_password_hash: '$2y$12$4L1U3009ffceyxtaCcoh2efQx.XeY48u6iStryuZJsIfrOUGPjQp.'
+
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
@@ -5,7 +12,12 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        users_in_memory:
+            memory:
+                users:
+                    admin:
+                        password: '%env(default:app.default_admin_password_hash:ADMIN_PASSWORD_HASH)%'
+                        roles: ['ROLE_SUPER_ADMIN']
 
     firewalls:
         dev:
@@ -15,6 +27,10 @@ security:
         main:
             lazy: true
             provider: users_in_memory
+            http_basic: ~
+            logout:
+                path: /admin/logout
+                target: /admin
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -24,7 +40,7 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_SUPER_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
