@@ -27,14 +27,14 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
 
         yield MenuItem::section('Заявки и оплаты');
-        yield MenuItem::linkToCrud('Applications', 'fa fa-file-alt', \App\Entity\Application::class);
-        yield MenuItem::linkToCrud('Payments', 'fa fa-credit-card', \App\Entity\Payment::class);
-        yield MenuItem::linkToCrud('Users', 'fa fa-users', \App\Entity\User::class);
+        yield MenuItem::linkTo(ApplicationCrudController::class, 'Applications', 'fa fa-file-alt');
+        yield MenuItem::linkTo(PaymentCrudController::class, 'Payments', 'fa fa-credit-card');
+        yield MenuItem::linkTo(UserCrudController::class, 'Users', 'fa fa-users');
 
         yield MenuItem::section('Продукты и цены');
-        yield MenuItem::linkToCrud('Products', 'fa fa-box', \App\Entity\Product::class);
-        yield MenuItem::linkToCrud('Pricing Periods', 'fa fa-calendar', \App\Entity\PricingPeriod::class);
-        yield MenuItem::linkToCrud('Participation Options', 'fa fa-list', \App\Entity\ParticipationOption::class);
-        yield MenuItem::linkToCrud('Participation Prices', 'fa fa-ruble-sign', \App\Entity\ParticipationPrice::class);
+        yield MenuItem::linkTo(ProductCrudController::class, 'Products', 'fa fa-box');
+        yield MenuItem::linkTo(PricingPeriodCrudController::class, 'Pricing Periods', 'fa fa-calendar');
+        yield MenuItem::linkTo(ParticipationOptionCrudController::class, 'Participation Options', 'fa fa-list');
+        yield MenuItem::linkTo(ParticipationPriceCrudController::class, 'Participation Prices', 'fa fa-ruble-sign');
     }
 }

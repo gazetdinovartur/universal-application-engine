@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api')]
@@ -28,7 +29,10 @@ class ApplicationController extends AbstractController
         $calculateRequest = new CalculatePriceRequest(
             productSlug: $data['productSlug'] ?? '',
             participationOptionCode: $data['participationOptionCode'] ?? '',
-            payNowPercent: isset($data['payNowPercent']) ? (int) $data['payNowPercent'] : null,
+            adultsCount: max(1, (int) ($data['adultsCount'] ?? 1)),
+            childrenCount: max(0, (int) ($data['childrenCount'] ?? 0)),
+            transferIncluded: (bool) ($data['transferIncluded'] ?? false),
+            paymentFactor: (float) ($data['paymentFactor'] ?? 1.0),
         );
 
         $result = $this->pricingCalculator->calculate($calculateRequest);
@@ -45,22 +49,35 @@ class ApplicationController extends AbstractController
     #[Route('/applications', name: 'api_applications_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $data = $request->toArray();
-        $createRequest = new CreateApplicationRequest(
-            name: $data['name'] ?? '',
-            email: $data['email'] ?? '',
-            phone: $data['phone'] ?? null,
-            productSlug: $data['productSlug'] ?? '',
-            participationOptionCode: $data['participationOptionCode'] ?? '',
-            payload: $data['payload'] ?? [],
-            payNowAmount: isset($data['payNowAmount']) ? (int) $data['payNowAmount'] : null,
-        );
+        try {
+            $data = $request->toArray();
+            $createRequest = new CreateApplicationRequest(
+                name: $data['name'] ?? '',
+                email: $data['email'] ?? '',
+                phone: $data['phone'] ?? null,
+                productSlug: $data['productSlug'] ?? '',
+                participationOptionCode: $data['participationOptionCode'] ?? '',
+                payload: $data['payload'] ?? [],
+                adultsCount: max(1, (int) ($data['adultsCount'] ?? 1)),
+                childrenCount: max(0, (int) ($data['childrenCount'] ?? 0)),
+                transferIncluded: (bool) ($data['transferIncluded'] ?? false),
+                paymentFactor: (float) ($data['paymentFactor'] ?? 1.0),
+                payNowAmount: isset($data['payNowAmount']) ? (int) $data['payNowAmount'] : null,
+            );
 
-        $application = $this->applicationService->create($createRequest);
+            $application = $this->applicationService->create($createRequest);
+            $payload = $application->getPayload();
 
-        return $this->json([
-            'uuid' => (string) $application->getUuid(),
-            'status' => $application->getStatus()->value,
-        ], Response::HTTP_CREATED);
+            return $this->json([
+                'uuid' => (string) $application->getUuid(),
+                'status' => $application->getStatus()->value,
+                'totalAmount' => $application->getTotalAmount(),
+                'payNowAmount' => (int) ($payload['payNowAmount'] ?? $application->getTotalAmount()),
+                'pricingPeriodName' => $payload['pricingPeriodName'] ?? null,
+                'participationOptionName' => $payload['participationOptionName'] ?? null,
+            ], Response::HTTP_CREATED);
+        } catch (HttpExceptionInterface $e) {
+            return $this->json(['error' => $e->getMessage()], $e->getStatusCode());
+        }
     }
 }

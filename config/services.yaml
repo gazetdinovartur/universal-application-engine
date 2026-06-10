@@ -11,6 +11,11 @@ parameters:
     env(YOOKASSA_SECRET_KEY): ''
     env(GOOGLE_SHEETS_WEBHOOK_URL): ''
     env(APP_URL): '%env(DEFAULT_URI)%'
+    env(FRONTEND_URL): '%env(APP_URL)%'
+    env(MAILER_FROM): 'noreply@example.com'
+    env(MAILER_FROM_NAME): 'Hanuman Fest'
+    env(CORS_ALLOW_ORIGIN): '*'
+    env(MAILER_DSN): 'null://null'
 
 services:
     # default configuration for services in *this* file
@@ -27,8 +32,18 @@ services:
         arguments:
             $shopId: '%env(YOOKASSA_SHOP_ID)%'
             $secretKey: '%env(YOOKASSA_SECRET_KEY)%'
-            $returnUrl: '%env(APP_URL)%'
+            $returnUrl: '%env(FRONTEND_URL)%/return'
 
     App\Infrastructure\GoogleSheets\GoogleSheetsClient:
         arguments:
             $webhookUrl: '%env(GOOGLE_SHEETS_WEBHOOK_URL)%'
+
+    App\Service\PaymentNotificationService:
+        arguments:
+            $fromEmail: '%env(MAILER_FROM)%'
+            $fromName: '%env(MAILER_FROM_NAME)%'
+            $frontendUrl: '%env(FRONTEND_URL)%'
+
+    App\EventListener\CorsListener:
+        arguments:
+            $allowOrigin: '%env(CORS_ALLOW_ORIGIN)%'

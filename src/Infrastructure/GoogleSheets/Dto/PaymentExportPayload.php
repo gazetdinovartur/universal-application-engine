@@ -19,6 +19,7 @@ readonly class PaymentExportPayload
         public ?string $totalAmount = null,
         public ?string $paidTotal = null,
         public ?string $remaining = null,
+        public string $action = 'payment',
     ) {
     }
 
@@ -26,6 +27,7 @@ readonly class PaymentExportPayload
     public function toArray(): array
     {
         return [
+            'action' => $this->action,
             'email' => $this->email,
             'phone' => $this->phone,
             'amount' => $this->amount,

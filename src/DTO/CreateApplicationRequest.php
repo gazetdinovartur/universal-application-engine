@@ -2,17 +2,21 @@
 
 namespace App\DTO;
 
-class CreateApplicationRequest
+readonly class CreateApplicationRequest
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $email,
-        public readonly ?string $phone,
-        public readonly string $productSlug,
-        public readonly string $participationOptionCode,
+        public string $name,
+        public string $email,
+        public ?string $phone,
+        public string $productSlug,
+        public string $participationOptionCode,
         /** @var array<string, mixed> */
-        public readonly array $payload = [],
-        public readonly ?int $payNowAmount = null,
+        public array $payload = [],
+        public int $adultsCount = 1,
+        public int $childrenCount = 0,
+        public bool $transferIncluded = false,
+        public float $paymentFactor = 1.0,
+        public ?int $payNowAmount = null,
     ) {
     }
 }

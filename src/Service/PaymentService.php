@@ -5,6 +5,7 @@ namespace App\Service;
 use App\DTO\CreatePaymentRequest;
 use App\Entity\Application;
 use App\Entity\Payment;
+use App\Entity\PaymentLink;
 use App\Enum\ApplicationStatus;
 use App\Enum\PaymentProvider;
 use App\Enum\PaymentStatus;
@@ -17,9 +18,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * Портировано из legacy/wordpress/yookassa-plugin.php.
- */
 class PaymentService
 {
     public function __construct(
@@ -29,6 +27,7 @@ class PaymentService
         private readonly YookassaClient $yookassaClient,
         private readonly GoogleSheetsExportService $googleSheetsExportService,
         private readonly PaymentLinkService $paymentLinkService,
+        private readonly PaymentNotificationService $paymentNotificationService,
     ) {
     }
 
@@ -37,20 +36,27 @@ class PaymentService
      */
     public function createYookassaPayment(CreatePaymentRequest $request): array
     {
-        $email = filter_var($request->email, FILTER_VALIDATE_EMAIL);
-        $phone = PhoneNormalizer::toE164($request->phone);
-        $amount = $request->resolveAmount();
-
-        if (!$email || !$phone || $amount <= 0) {
-            throw new BadRequestHttpException('Invalid input');
-        }
-
         $application = null;
+
         if ($request->applicationUuid) {
             $application = $this->applicationRepository->findOneByUuid($request->applicationUuid);
             if (!$application) {
                 throw new NotFoundHttpException('Application not found');
             }
+
+            $email = $application->getUser()?->getEmail();
+            $phone = $application->getUser()?->getPhone();
+        } else {
+            $email = $request->email;
+            $phone = $request->phone;
+        }
+
+        $email = filter_var($email, FILTER_VALIDATE_EMAIL);
+        $phone = PhoneNormalizer::toE164($phone);
+        $amount = $this->resolvePaymentAmount($request, $application);
+
+        if (!$email || !$phone || $amount <= 0) {
+            throw new BadRequestHttpException('Invalid input');
         }
 
         $yookassaResult = $this->yookassaClient->createPayment($email, $phone, $amount);
@@ -72,6 +78,36 @@ class PaymentService
             'payment_id' => $yookassaResult->paymentId,
             'gateway_url' => $yookassaResult->gatewayUrl,
         ];
+    }
+
+  /**
+   * @return array{payment_id: string, gateway_url: string}
+   */
+    public function createPaymentFromLink(string $token): array
+    {
+        $paymentLink = $this->paymentLinkService->getValidLink($token);
+        $application = $paymentLink->getApplication();
+
+        if (!$application) {
+            throw new NotFoundHttpException('Application not found');
+        }
+
+        $remaining = $application->getTotalAmount() - $application->getPaidAmount();
+        if ($remaining <= 0) {
+            throw new BadRequestHttpException('Application is already fully paid');
+        }
+
+        $user = $application->getUser();
+        if (!$user) {
+            throw new BadRequestHttpException('Application has no user');
+        }
+
+        return $this->createYookassaPayment(new CreatePaymentRequest(
+            email: $user->getEmail(),
+            phone: $user->getPhone() ?? '',
+            amount: $remaining,
+            applicationUuid: (string) $application->getUuid(),
+        ));
     }
 
     /**
@@ -148,6 +184,31 @@ class PaymentService
         return $count;
     }
 
+    private function resolvePaymentAmount(CreatePaymentRequest $request, ?Application $application): int
+    {
+        if ($request->manualAmount !== null && $request->manualAmount > 0) {
+            return $request->manualAmount;
+        }
+
+        if ($application) {
+            $remaining = $application->getTotalAmount() - $application->getPaidAmount();
+            if ($remaining <= 0) {
+                return 0;
+            }
+
+            if ($application->getPaidAmount() === 0) {
+                $payload = $application->getPayload();
+                $payNow = (int) ($payload['payNowAmount'] ?? $remaining);
+
+                return min($payNow, $remaining);
+            }
+
+            return $remaining;
+        }
+
+        return max(0, $request->amount);
+    }
+
     private function markPaymentSucceeded(Payment $payment): void
     {
         if ($payment->getStatus() === PaymentStatus::Succeeded) {
@@ -158,6 +219,8 @@ class PaymentService
         $payment->setPaidAt(new \DateTimeImmutable());
 
         $application = $payment->getApplication();
+        $paymentLink = null;
+
         if ($application) {
             $application->setPaidAmount($application->getPaidAmount() + $payment->getAmount());
             $this->updateApplicationStatus($application);
@@ -166,7 +229,7 @@ class PaymentService
                 $application->getStatus() === ApplicationStatus::PartiallyPaid
                 && $application->getPaymentLinks()->isEmpty()
             ) {
-                $this->paymentLinkService->createForApplication($application);
+                $paymentLink = $this->paymentLinkService->createForApplication($application);
             }
         }
 
@@ -174,6 +237,10 @@ class PaymentService
 
         if ($application) {
             $this->googleSheetsExportService->exportSuccessfulPayment($payment);
+
+            if ($paymentLink instanceof PaymentLink) {
+                $this->paymentNotificationService->sendPartialPaymentEmail($application, $paymentLink);
+            }
         }
     }
 

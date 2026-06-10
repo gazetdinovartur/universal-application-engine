@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Оплата остатка</title>
+</head>
+<body style="font-family: sans-serif; line-height: 1.5; color: #222;">
+    <p>Здравствуйте, {{ name }}!</p>
+
+    <p>Спасибо за регистрацию на Hanuman Fest.</p>
+
+    <p>
+        <strong>Оплачено:</strong> {{ paidAmount }} ₽<br>
+        <strong>Осталось:</strong> {{ remainingAmount }} ₽<br>
+        <strong>Всего по заявке:</strong> {{ totalAmount }} ₽
+    </p>
+
+    <p>
+        Для оплаты остатка перейдите по ссылке:<br>
+        <a href="{{ payUrl }}">{{ payUrl }}</a>
+    </p>
+
+    <p>С уважением,<br>Команда Hanuman Fest</p>
+</body>
+</html>

@@ -31,7 +31,7 @@ class PaymentLink
     {
         $this->token = Uuid::v7()->toRfc4122();
         $this->createdAt = new \DateTimeImmutable();
-        $this->expiresAt = new \DateTimeImmutable('+30 days');
+        $this->expiresAt = new \DateTimeImmutable('+90 days');
     }
 
     public function getId(): ?int
