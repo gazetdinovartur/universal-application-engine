@@ -16,11 +16,11 @@ final class Version20250610120000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE payment ALTER application_id DROP NOT NULL');
+        $this->addSql('ALTER TABLE payment MODIFY application_id INT DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE payment ALTER application_id SET NOT NULL');
+        $this->addSql('ALTER TABLE payment MODIFY application_id INT NOT NULL');
     }
 }
