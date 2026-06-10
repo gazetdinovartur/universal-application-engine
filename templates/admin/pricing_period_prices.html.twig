@@ -36,6 +36,27 @@
         <form method="post" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token('pricing_period_prices_' ~ period.id) }}">
 
+            <h2 style="margin: 4px 0 12px;">Редактирование периода</h2>
+            <div style="display:grid; grid-template-columns: 1fr 220px 220px 150px; gap: 10px; align-items: end;">
+                <label>
+                    <div style="margin-bottom: 4px;">Название периода</div>
+                    <input type="text" name="period_name" value="{{ periodForm.name }}" required style="width:100%; box-sizing:border-box; padding:8px;">
+                </label>
+                <label>
+                    <div style="margin-bottom: 4px;">Начало</div>
+                    <input type="datetime-local" name="period_start_at" value="{{ periodForm.startAt }}" required style="width:100%; box-sizing:border-box; padding:8px;">
+                </label>
+                <label>
+                    <div style="margin-bottom: 4px;">Окончание</div>
+                    <input type="datetime-local" name="period_end_at" value="{{ periodForm.endAt }}" required style="width:100%; box-sizing:border-box; padding:8px;">
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; margin-bottom: 8px;">
+                    <input type="checkbox" name="period_is_active" value="1" {% if periodForm.isActive %}checked{% endif %}>
+                    Активен
+                </label>
+            </div>
+
+            <h2 style="margin: 18px 0 8px;">Редактирование цен участия</h2>
             <table>
                 <thead>
                 <tr>
@@ -67,7 +88,7 @@
             </table>
 
             <div class="actions">
-                <button type="submit" class="btn btn-primary">Сохранить все цены</button>
+                <button type="submit" class="btn btn-primary">Сохранить период и цены</button>
                 <a href="{{ periodsIndexUrl }}" class="btn">
                     К периодам стоимости
                 </a>

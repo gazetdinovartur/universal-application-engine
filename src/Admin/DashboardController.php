@@ -35,6 +35,5 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ProductCrudController::class, 'Проекты', 'fa fa-box');
         yield MenuItem::linkTo(PricingPeriodCrudController::class, 'Периоды стоимости', 'fa fa-calendar');
         yield MenuItem::linkTo(ParticipationOptionCrudController::class, 'Варианты участия', 'fa fa-list');
-        yield MenuItem::linkTo(ParticipationPriceCrudController::class, 'Цены участия', 'fa fa-ruble-sign');
     }
 }

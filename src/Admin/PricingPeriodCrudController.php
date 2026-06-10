@@ -48,7 +48,18 @@ class PricingPeriodCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->hideOnForm();
         yield AssociationField::new('product')->setLabel('Проект');
-        yield TextField::new('name')->setLabel('Название периода');
+        if (Crud::PAGE_INDEX === $pageName) {
+            yield TextField::new('name')->setLabel('Название периода')
+                ->formatValue(function ($value, PricingPeriod $period): string {
+                    $url = $this->generateUrl('admin_pricing_period_prices', ['id' => $period->getId()]);
+                    $label = htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+                    return sprintf('<a href="%s">%s</a>', $url, $label);
+                })
+                ->renderAsHtml();
+        } else {
+            yield TextField::new('name')->setLabel('Название периода');
+        }
         yield DateTimeField::new('startAt')->setLabel('Начало');
         yield DateTimeField::new('endAt')->setLabel('Окончание');
         yield BooleanField::new('isActive')->setLabel('Активен');

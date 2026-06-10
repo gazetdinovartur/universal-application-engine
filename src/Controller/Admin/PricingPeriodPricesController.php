@@ -49,6 +49,13 @@ class PricingPeriodPricesController extends AbstractController
             $formPrices[$optionId] = $priceByOptionId[$optionId]?->getPrice() ?? 0;
         }
 
+        $periodForm = [
+            'name' => $pricingPeriod->getName(),
+            'startAt' => $pricingPeriod->getStartAt()->format('Y-m-d\TH:i'),
+            'endAt' => $pricingPeriod->getEndAt()->format('Y-m-d\TH:i'),
+            'isActive' => $pricingPeriod->isActive(),
+        ];
+
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid(
                 sprintf('pricing_period_prices_%d', $pricingPeriod->getId()),
@@ -57,8 +64,44 @@ class PricingPeriodPricesController extends AbstractController
                 throw $this->createAccessDeniedException('Invalid CSRF token.');
             }
 
-            $submittedPrices = $request->request->all('prices');
+            $periodForm['name'] = trim((string) $request->request->get('period_name', ''));
+            $periodForm['startAt'] = trim((string) $request->request->get('period_start_at', ''));
+            $periodForm['endAt'] = trim((string) $request->request->get('period_end_at', ''));
+            $periodForm['isActive'] = null !== $request->request->get('period_is_active');
+
             $hasErrors = false;
+            $startAt = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $periodForm['startAt']);
+            $endAt = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $periodForm['endAt']);
+
+            if ('' === $periodForm['name']) {
+                $this->addFlash('danger', 'Название периода обязательно.');
+                $hasErrors = true;
+            }
+
+            if (!$startAt) {
+                $this->addFlash('danger', 'Некорректная дата начала периода.');
+                $hasErrors = true;
+            }
+
+            if (!$endAt) {
+                $this->addFlash('danger', 'Некорректная дата окончания периода.');
+                $hasErrors = true;
+            }
+
+            if ($startAt && $endAt && $endAt <= $startAt) {
+                $this->addFlash('danger', 'Дата окончания должна быть позже даты начала.');
+                $hasErrors = true;
+            }
+
+            if (!$hasErrors && $startAt && $endAt) {
+                $pricingPeriod->setName($periodForm['name']);
+                $pricingPeriod->setStartAt($startAt);
+                $pricingPeriod->setEndAt($endAt);
+                $pricingPeriod->setIsActive((bool) $periodForm['isActive']);
+                $entityManager->persist($pricingPeriod);
+            }
+
+            $submittedPrices = $request->request->all('prices');
 
             foreach ($options as $option) {
                 $optionId = $option->getId();
@@ -88,7 +131,7 @@ class PricingPeriodPricesController extends AbstractController
 
             if (!$hasErrors) {
                 $entityManager->flush();
-                $this->addFlash('success', 'Цены периода обновлены.');
+                $this->addFlash('success', 'Период и цены обновлены.');
 
                 return $this->redirectToRoute('admin_pricing_period_prices', ['id' => $pricingPeriod->getId()]);
             }
@@ -98,6 +141,7 @@ class PricingPeriodPricesController extends AbstractController
             'period' => $pricingPeriod,
             'options' => $options,
             'formPrices' => $formPrices,
+            'periodForm' => $periodForm,
             'periodsIndexUrl' => $adminUrlGenerator
                 ->setController(\App\Admin\PricingPeriodCrudController::class)
                 ->setAction(Crud::PAGE_INDEX)
