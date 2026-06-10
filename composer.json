@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "^2.18.3",
         "doctrine/doctrine-migrations-bundle": "^3.7",
+        "doctrine/instantiator": ">=2.0 <2.1",
         "doctrine/orm": "^3.6",
         "easycorp/easyadmin-bundle": "^5.0",
         "phpdocumentor/reflection-docblock": "^6.0",
@@ -24,6 +25,7 @@
         "symfony/property-info": "7.4.*",
         "symfony/runtime": "7.4.*",
         "symfony/serializer": "7.4.*",
+        "symfony/ux-twig-component": "^2.36",
         "symfony/validator": "7.4.*",
         "symfony/yaml": "7.4.*"
     },
