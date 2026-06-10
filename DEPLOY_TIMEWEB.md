@@ -3,10 +3,10 @@
 ## 1. Prerequisites
 
 - Domain/subdomain: `api.хануманфест.рф`
-- PHP: `8.4`
+- PHP: `8.2`
 - MySQL: `8.0` (DB: `cb15013_uae`)
 - Site root: `public/`
-- Repository sync: GitHub (branch `compat/php82-mysql` or release branch)
+- Repository sync: GitHub (branch `main` or release branch)
 
 ## 2. Environment Variables (`.env.local`)
 
