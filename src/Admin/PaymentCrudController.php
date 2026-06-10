@@ -24,30 +24,30 @@ class PaymentCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Payment')
-            ->setEntityLabelInPlural('Payments')
+            ->setEntityLabelInSingular('Платеж')
+            ->setEntityLabelInPlural('Платежи')
             ->setDefaultSort(['createdAt' => 'DESC']);
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield AssociationField::new('application');
+        yield AssociationField::new('application')->setLabel('Заявка');
         yield ChoiceField::new('provider')
             ->setChoices([
                 'YooKassa' => PaymentProvider::Yookassa,
-            ]);
-        yield TextField::new('providerPaymentId');
-        yield IntegerField::new('amount')->setLabel('Amount (₽)');
+            ])->setLabel('Провайдер');
+        yield TextField::new('providerPaymentId')->setLabel('ID платежа у провайдера');
+        yield IntegerField::new('amount')->setLabel('Сумма (₽)');
         yield ChoiceField::new('status')
             ->setChoices([
-                'Pending' => PaymentStatus::Pending,
-                'Succeeded' => PaymentStatus::Succeeded,
-                'Failed' => PaymentStatus::Failed,
-                'Cancelled' => PaymentStatus::Cancelled,
-            ]);
-        yield DateTimeField::new('paidAt');
-        yield DateTimeField::new('createdAt')->hideOnForm();
-        yield DateTimeField::new('updatedAt')->hideOnForm();
+                'Ожидает' => PaymentStatus::Pending,
+                'Успешен' => PaymentStatus::Succeeded,
+                'Ошибка' => PaymentStatus::Failed,
+                'Отменен' => PaymentStatus::Cancelled,
+            ])->setLabel('Статус');
+        yield DateTimeField::new('paidAt')->setLabel('Оплачен');
+        yield DateTimeField::new('createdAt')->setLabel('Создан')->hideOnForm();
+        yield DateTimeField::new('updatedAt')->setLabel('Обновлен')->hideOnForm();
     }
 }

@@ -24,29 +24,29 @@ class ApplicationCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Application')
-            ->setEntityLabelInPlural('Applications')
+            ->setEntityLabelInSingular('Заявка')
+            ->setEntityLabelInPlural('Заявки')
             ->setDefaultSort(['createdAt' => 'DESC']);
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield TextField::new('uuid')->hideOnForm();
-        yield AssociationField::new('user');
-        yield AssociationField::new('product');
-        yield AssociationField::new('pricingPeriod');
+        yield TextField::new('uuid')->setLabel('UUID')->hideOnForm();
+        yield AssociationField::new('user')->setLabel('Пользователь');
+        yield AssociationField::new('product')->setLabel('Проект');
+        yield AssociationField::new('pricingPeriod')->setLabel('Период стоимости');
         yield ChoiceField::new('status')
             ->setChoices([
-                'New' => ApplicationStatus::New,
-                'Partially Paid' => ApplicationStatus::PartiallyPaid,
-                'Paid' => ApplicationStatus::Paid,
-                'Cancelled' => ApplicationStatus::Cancelled,
-            ]);
-        yield IntegerField::new('totalAmount')->setLabel('Total (₽)');
-        yield IntegerField::new('paidAmount')->setLabel('Paid (₽)');
-        yield CodeEditorField::new('payload')->onlyOnDetail();
-        yield DateTimeField::new('createdAt')->hideOnForm();
-        yield DateTimeField::new('updatedAt')->hideOnForm();
+                'Новая' => ApplicationStatus::New,
+                'Частично оплачена' => ApplicationStatus::PartiallyPaid,
+                'Оплачена' => ApplicationStatus::Paid,
+                'Отменена' => ApplicationStatus::Cancelled,
+            ])->setLabel('Статус');
+        yield IntegerField::new('totalAmount')->setLabel('Итого (₽)');
+        yield IntegerField::new('paidAmount')->setLabel('Оплачено (₽)');
+        yield CodeEditorField::new('payload')->setLabel('Данные формы')->onlyOnDetail();
+        yield DateTimeField::new('createdAt')->setLabel('Создана')->hideOnForm();
+        yield DateTimeField::new('updatedAt')->setLabel('Обновлена')->hideOnForm();
     }
 }

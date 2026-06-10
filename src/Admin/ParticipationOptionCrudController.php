@@ -19,15 +19,15 @@ class ParticipationOptionCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Participation Option')
-            ->setEntityLabelInPlural('Participation Options');
+            ->setEntityLabelInSingular('Вариант участия')
+            ->setEntityLabelInPlural('Варианты участия');
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield AssociationField::new('product');
-        yield TextField::new('code');
-        yield TextField::new('name');
+        yield AssociationField::new('product')->setLabel('Проект');
+        yield TextField::new('code')->setLabel('Код');
+        yield TextField::new('name')->setLabel('Название');
     }
 }

@@ -20,15 +20,15 @@ class ProductCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Product')
-            ->setEntityLabelInPlural('Products');
+            ->setEntityLabelInSingular('Проект')
+            ->setEntityLabelInPlural('Проекты');
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield TextField::new('name');
-        yield SlugField::new('slug')->setTargetFieldName('name');
-        yield BooleanField::new('isActive');
+        yield TextField::new('name')->setLabel('Название');
+        yield SlugField::new('slug')->setTargetFieldName('name')->setLabel('Слаг');
+        yield BooleanField::new('isActive')->setLabel('Активен');
     }
 }

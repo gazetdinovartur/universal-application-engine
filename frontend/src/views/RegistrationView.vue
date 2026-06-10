@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { calculatePrice, createApplication, createPayment, getProduct } from '../api';
 
-const PRODUCT_SLUG = 'hanuman-fest-2027';
+const PRODUCT_SLUG = 'hanuman-fest-2026';
 
 const loading = ref(false);
 const submitting = ref(false);

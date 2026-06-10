@@ -29,37 +29,76 @@ class SeedHanumanFestCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $product = $this->entityManager->getRepository(Product::class)->findOneBy(['slug' => 'hanuman-fest-2027']);
+        $product = $this->entityManager->getRepository(Product::class)->findOneBy(['slug' => 'hanuman-fest-2026']);
         if ($product) {
-            $io->warning('Product hanuman-fest-2027 already exists, skipping seed.');
-
-            return Command::SUCCESS;
+            $io->warning('Проект hanuman-fest-2026 уже существует, обновляем периоды и цены.');
+        } else {
+            $product = new Product();
+            $product->setName('Hanuman Fest 2026');
+            $product->setSlug('hanuman-fest-2026');
+            $product->setIsActive(true);
+            $this->entityManager->persist($product);
         }
 
-        $product = new Product();
-        $product->setName('Hanuman Fest 2027');
-        $product->setSlug('hanuman-fest-2027');
-        $product->setIsActive(true);
-        $this->entityManager->persist($product);
-
         $periods = [
-            ['Early Bird', '2026-01-01', '2027-03-01', 8200],
-            ['Regular', '2027-03-01', '2027-04-01', 9200],
-            ['Last Chance', '2027-04-01', '2027-07-01', 12000],
+            ['До 10 марта', '2026-01-01 00:00:00', '2026-03-10 23:59:59'],
+            ['До 15 апреля', '2026-03-11 00:00:00', '2026-04-15 23:59:59'],
+            ['До 1 июня', '2026-04-16 00:00:00', '2026-06-01 23:59:59'],
+            ['После 1 июня', '2026-06-02 00:00:00', '2026-06-28 23:59:59'],
         ];
 
         $optionDefs = [
-            ['OWN_HOUSE_NO_FOOD', 'Свой дом, без питания'],
-            ['OWN_HOUSE_FOOD', 'Свой дом, с питанием'],
-            ['OUR_TENT_NO_FOOD', 'Наш шатёр, без питания'],
-            ['OUR_TENT_FOOD', 'Наш шатёр, с питанием'],
-            ['ONE_DAY', 'Один день'],
-            ['ONE_DAY_FOOD', 'Один день с питанием'],
+            ['OWN_HOUSE_NO_FOOD', 'в своем жилье (домик или палатка), без питания'],
+            ['OWN_HOUSE_FOOD', 'в своем жилье с питанием'],
+            ['OUR_TENT_NO_FOOD', 'в нашей палатке, без питания'],
+            ['OUR_TENT_FOOD', 'в нашей палатке, с питанием'],
+            ['ONE_DAY', 'участие 1 день без питания (без ночевой)'],
+            ['ONE_DAY_FOOD', 'участие 1 день с питанием (без ночевой)'],
         ];
 
+        $priceMatrix = [
+            'До 10 марта' => [
+                'OWN_HOUSE_NO_FOOD' => 3600,
+                'OWN_HOUSE_FOOD' => 6400,
+                'OUR_TENT_NO_FOOD' => 4600,
+                'OUR_TENT_FOOD' => 7400,
+                'ONE_DAY' => 2000,
+                'ONE_DAY_FOOD' => 3400,
+            ],
+            'До 15 апреля' => [
+                'OWN_HOUSE_NO_FOOD' => 4200,
+                'OWN_HOUSE_FOOD' => 7000,
+                'OUR_TENT_NO_FOOD' => 5200,
+                'OUR_TENT_FOOD' => 8000,
+                'ONE_DAY' => 2400,
+                'ONE_DAY_FOOD' => 3800,
+            ],
+            'До 1 июня' => [
+                'OWN_HOUSE_NO_FOOD' => 4800,
+                'OWN_HOUSE_FOOD' => 7600,
+                'OUR_TENT_NO_FOOD' => 5800,
+                'OUR_TENT_FOOD' => 8600,
+                'ONE_DAY' => 2800,
+                'ONE_DAY_FOOD' => 4200,
+            ],
+            'После 1 июня' => [
+                'OWN_HOUSE_NO_FOOD' => 5400,
+                'OWN_HOUSE_FOOD' => 8200,
+                'OUR_TENT_NO_FOOD' => 6400,
+                'OUR_TENT_FOOD' => 9200,
+                'ONE_DAY' => 3200,
+                'ONE_DAY_FOOD' => 4600,
+            ],
+        ];
+
+        $existingOptions = $this->entityManager->getRepository(ParticipationOption::class)->findBy(['product' => $product]);
         $options = [];
+        foreach ($existingOptions as $existingOption) {
+            $options[$existingOption->getCode()] = $existingOption;
+        }
+
         foreach ($optionDefs as [$code, $name]) {
-            $option = new ParticipationOption();
+            $option = $options[$code] ?? new ParticipationOption();
             $option->setProduct($product);
             $option->setCode($code);
             $option->setName($name);
@@ -67,8 +106,14 @@ class SeedHanumanFestCommand extends Command
             $options[$code] = $option;
         }
 
-        foreach ($periods as [$name, $start, $end, $basePrice]) {
-            $period = new PricingPeriod();
+        $existingPeriods = $this->entityManager->getRepository(PricingPeriod::class)->findBy(['product' => $product]);
+        $periodsByName = [];
+        foreach ($existingPeriods as $existingPeriod) {
+            $periodsByName[$existingPeriod->getName()] = $existingPeriod;
+        }
+
+        foreach ($periods as [$name, $start, $end]) {
+            $period = $periodsByName[$name] ?? new PricingPeriod();
             $period->setProduct($product);
             $period->setName($name);
             $period->setStartAt(new \DateTimeImmutable($start));
@@ -77,22 +122,20 @@ class SeedHanumanFestCommand extends Command
             $this->entityManager->persist($period);
 
             foreach ($options as $code => $option) {
-                $price = new ParticipationPrice();
+                $price = $this->entityManager->getRepository(ParticipationPrice::class)->findOneBy([
+                    'pricingPeriod' => $period,
+                    'participationOption' => $option,
+                ]) ?? new ParticipationPrice();
                 $price->setPricingPeriod($period);
                 $price->setParticipationOption($option);
-                $price->setPrice(match ($code) {
-                    'ONE_DAY' => (int) round($basePrice * 0.35),
-                    'ONE_DAY_FOOD' => (int) round($basePrice * 0.45),
-                    'OUR_TENT_NO_FOOD', 'OUR_TENT_FOOD' => (int) round($basePrice * 0.85),
-                    default => $basePrice,
-                });
+                $price->setPrice($priceMatrix[$name][$code]);
                 $this->entityManager->persist($price);
             }
         }
 
         $this->entityManager->flush();
 
-        $io->success('Hanuman Fest 2027 seed data created.');
+        $io->success('Hanuman Fest 2026: периоды, варианты участия и цены обновлены.');
 
         return Command::SUCCESS;
     }

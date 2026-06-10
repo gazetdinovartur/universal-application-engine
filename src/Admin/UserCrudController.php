@@ -21,18 +21,18 @@ class UserCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('User')
-            ->setEntityLabelInPlural('Users')
+            ->setEntityLabelInSingular('Пользователь')
+            ->setEntityLabelInPlural('Пользователи')
             ->setDefaultSort(['createdAt' => 'DESC']);
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield TextField::new('name');
-        yield EmailField::new('email');
-        yield TelephoneField::new('phone');
-        yield DateTimeField::new('createdAt')->hideOnForm();
-        yield DateTimeField::new('updatedAt')->hideOnForm();
+        yield TextField::new('name')->setLabel('Имя');
+        yield EmailField::new('email')->setLabel('Email');
+        yield TelephoneField::new('phone')->setLabel('Телефон');
+        yield DateTimeField::new('createdAt')->setLabel('Создан')->hideOnForm();
+        yield DateTimeField::new('updatedAt')->setLabel('Обновлен')->hideOnForm();
     }
 }

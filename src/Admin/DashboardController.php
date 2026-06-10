@@ -24,17 +24,17 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
+        yield MenuItem::linkToDashboard('Главная', 'fa fa-home');
 
-        yield MenuItem::section('Заявки и оплаты');
-        yield MenuItem::linkTo(ApplicationCrudController::class, 'Applications', 'fa fa-file-alt');
-        yield MenuItem::linkTo(PaymentCrudController::class, 'Payments', 'fa fa-credit-card');
-        yield MenuItem::linkTo(UserCrudController::class, 'Users', 'fa fa-users');
+        yield MenuItem::section('Основное');
+        yield MenuItem::linkTo(ApplicationCrudController::class, 'Заявки', 'fa fa-file-alt');
+        yield MenuItem::linkTo(PaymentCrudController::class, 'Платежи', 'fa fa-credit-card');
+        yield MenuItem::linkTo(UserCrudController::class, 'Пользователи', 'fa fa-users');
 
-        yield MenuItem::section('Продукты и цены');
-        yield MenuItem::linkTo(ProductCrudController::class, 'Products', 'fa fa-box');
-        yield MenuItem::linkTo(PricingPeriodCrudController::class, 'Pricing Periods', 'fa fa-calendar');
-        yield MenuItem::linkTo(ParticipationOptionCrudController::class, 'Participation Options', 'fa fa-list');
-        yield MenuItem::linkTo(ParticipationPriceCrudController::class, 'Participation Prices', 'fa fa-ruble-sign');
+        yield MenuItem::section('Проекты и цены');
+        yield MenuItem::linkTo(ProductCrudController::class, 'Проекты', 'fa fa-box');
+        yield MenuItem::linkTo(PricingPeriodCrudController::class, 'Периоды стоимости', 'fa fa-calendar');
+        yield MenuItem::linkTo(ParticipationOptionCrudController::class, 'Варианты участия', 'fa fa-list');
+        yield MenuItem::linkTo(ParticipationPriceCrudController::class, 'Цены участия', 'fa fa-ruble-sign');
     }
 }

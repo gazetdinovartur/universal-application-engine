@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ParticipationPriceCrudController extends AbstractCrudController
 {
@@ -19,15 +20,17 @@ class ParticipationPriceCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Participation Price')
-            ->setEntityLabelInPlural('Participation Prices');
+            ->setEntityLabelInSingular('Цена участия')
+            ->setEntityLabelInPlural('Цены участия')
+            ->setDefaultSort(['pricingPeriod' => 'ASC']);
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield AssociationField::new('pricingPeriod');
-        yield AssociationField::new('participationOption');
-        yield IntegerField::new('price')->setLabel('Price (₽)');
+        yield AssociationField::new('pricingPeriod')->setLabel('Период стоимости');
+        yield AssociationField::new('participationOption')->setLabel('Вариант участия');
+        yield TextField::new('participationOption.code', 'Код')->onlyOnIndex();
+        yield IntegerField::new('price')->setLabel('Цена (₽)');
     }
 }
