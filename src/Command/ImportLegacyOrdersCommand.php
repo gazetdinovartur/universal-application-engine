@@ -31,6 +31,15 @@ use Symfony\Component\Uid\Uuid;
 )]
 class ImportLegacyOrdersCommand extends Command
 {
+    /** @var array<string, User> */
+    private array $userByEmailCache = [];
+
+    /** @var array<string, Application> */
+    private array $applicationByProductEmailCache = [];
+
+    /** @var array<string, Payment> */
+    private array $paymentByProviderIdCache = [];
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ApplicationRepository $applicationRepository,
@@ -53,6 +62,9 @@ class ImportLegacyOrdersCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $this->userByEmailCache = [];
+        $this->applicationByProductEmailCache = [];
+        $this->paymentByProviderIdCache = [];
 
         $sources = [];
         $singleSource = (string) $input->getOption('source');
@@ -143,7 +155,7 @@ class ImportLegacyOrdersCommand extends Command
         $skipped = 0;
 
         foreach ($canonical as $rowKey => $record) {
-            $email = trim((string) $record['email']);
+            $email = $this->normalizeEmail((string) $record['email']);
             $name = trim((string) $record['name']);
             $phone = trim((string) $record['phone']);
             $legacyUuid = trim((string) $record['applicationUuid']);
@@ -378,6 +390,16 @@ class ImportLegacyOrdersCommand extends Command
 
     private function findOrCreateUser(string $name, string $email, string $phone): User
     {
+        $email = $this->normalizeEmail($email);
+        if (isset($this->userByEmailCache[$email])) {
+            $user = $this->userByEmailCache[$email];
+            $user->setName($name);
+            $user->setPhone($phone !== '' ? $phone : null);
+            $this->entityManager->persist($user);
+
+            return $user;
+        }
+
         $user = $this->userRepository->findOneByEmail($email);
         if (!$user) {
             $user = new User();
@@ -387,6 +409,7 @@ class ImportLegacyOrdersCommand extends Command
         $user->setName($name);
         $user->setPhone($phone !== '' ? $phone : null);
         $this->entityManager->persist($user);
+        $this->userByEmailCache[$email] = $user;
 
         return $user;
     }
@@ -396,12 +419,22 @@ class ImportLegacyOrdersCommand extends Command
         if ($legacyUuid !== '') {
             $existing = $this->applicationRepository->findOneByUuid($legacyUuid);
             if ($existing) {
+                $cacheKey = $this->applicationCacheKey($product, $email);
+                $this->applicationByProductEmailCache[$cacheKey] = $existing;
+
                 return $existing;
             }
         }
 
+        $cacheKey = $this->applicationCacheKey($product, $email);
+        if (isset($this->applicationByProductEmailCache[$cacheKey])) {
+            return $this->applicationByProductEmailCache[$cacheKey];
+        }
+
         $existingByEmail = $this->applicationRepository->findActiveDuplicateByEmail($email, $product);
         if ($existingByEmail) {
+            $this->applicationByProductEmailCache[$cacheKey] = $existingByEmail;
+
             return $existingByEmail;
         }
 
@@ -415,6 +448,8 @@ class ImportLegacyOrdersCommand extends Command
             } catch (\Throwable) {
             }
         }
+
+        $this->applicationByProductEmailCache[$cacheKey] = $application;
 
         return $application;
     }
@@ -436,6 +471,11 @@ class ImportLegacyOrdersCommand extends Command
             $paymentId = $fallbackId;
         }
 
+        $cacheKey = PaymentProvider::Yookassa->value.'|'.$paymentId;
+        if (isset($this->paymentByProviderIdCache[$cacheKey])) {
+            return [0, $amount];
+        }
+
         $payment = $this->paymentRepository->findOneByProviderPaymentId(PaymentProvider::Yookassa, $paymentId);
         if ($payment) {
             $payment->setApplication($application);
@@ -445,6 +485,7 @@ class ImportLegacyOrdersCommand extends Command
             if ($paidAt instanceof \DateTimeImmutable) {
                 $payment->setPaidAt($paidAt);
             }
+            $this->paymentByProviderIdCache[$cacheKey] = $payment;
 
             return [0, $amount];
         }
@@ -459,6 +500,7 @@ class ImportLegacyOrdersCommand extends Command
         $paidAt = $paidAt instanceof \DateTimeImmutable ? $paidAt : $fallbackDate;
         $payment->setPaidAt($paidAt ?? new \DateTimeImmutable());
         $this->entityManager->persist($payment);
+        $this->paymentByProviderIdCache[$cacheKey] = $payment;
 
         return [1, $amount];
     }
@@ -554,6 +596,16 @@ class ImportLegacyOrdersCommand extends Command
         $value = preg_replace('/[^\p{L}\p{N}]+/u', '', $value) ?? '';
 
         return $value;
+    }
+
+    private function normalizeEmail(string $email): string
+    {
+        return mb_strtolower(trim($email));
+    }
+
+    private function applicationCacheKey(Product $product, string $email): string
+    {
+        return sprintf('%s|%s', (string) $product->getId(), $this->normalizeEmail($email));
     }
 
     private function parseMoney(string $value): int
