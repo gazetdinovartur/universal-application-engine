@@ -22,6 +22,7 @@ final class AdminDashboardAfterLoginTest extends WebTestCase
         $client->submit($form);
 
         self::assertResponseRedirects();
+        self::assertStringContainsString('/admin/application', (string) $client->getResponse()->headers->get('Location'));
         $client->followRedirect();
 
         self::assertResponseIsSuccessful();

@@ -29,7 +29,7 @@ security:
                 enable_csrf: true
                 csrf_token_id: authenticate
             logout:
-                path: admin_logout
+                path: /admin/logout
                 target: admin_login
 
     access_control:
