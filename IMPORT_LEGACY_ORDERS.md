@@ -1,0 +1,65 @@
+# Import legacy orders and payment links
+
+## 1) Seed current festival data
+
+```bash
+php bin/console app:seed:hanuman-fest
+```
+
+## 2) Import live applications/payments from CSV
+
+Recommended: import both sources together:
+
+1. Google Sheet export (`Лист регистраций - Регистрации.csv`) — primary source with payments.
+2. Forminator export (`forminator-...csv`) — additional fields and fallback rows.
+
+Dry run:
+
+```bash
+php bin/console app:import:legacy-orders \
+  --sheet-source="/absolute/path/Лист регистраций - Регистрации.csv" \
+  --forminator-source="/absolute/path/forminator-форма-регистрации-260610234408.csv" \
+  --product-slug=hanuman-fest-2026 \
+  --dry-run
+```
+
+Real import:
+
+```bash
+php bin/console app:import:legacy-orders \
+  --sheet-source="/absolute/path/Лист регистраций - Регистрации.csv" \
+  --forminator-source="/absolute/path/forminator-форма-регистрации-260610234408.csv" \
+  --product-slug=hanuman-fest-2026
+```
+
+You can also import one source only:
+
+```bash
+php bin/console app:import:legacy-orders --source="/absolute/path/legacy-orders.csv"
+```
+
+Notes:
+- The importer auto-merges duplicate rows from both sources by UUID (if exists) or by a stable fingerprint.
+- It supports historical option aliases like `Только воскресение`, `Только суббота`, `С пятницы на субботу`, `С субботы на воскресение`.
+- Rows with `Вариант участия = Полный` are intentionally skipped (ambiguous legacy meaning for 2026 model) and should be reviewed manually.
+
+## 3) Generate links for second payment (50% cases)
+
+Dry run:
+
+```bash
+php bin/console app:payment-links:generate --product-slug=hanuman-fest-2026 --dry-run
+```
+
+Create links:
+
+```bash
+php bin/console app:payment-links:generate --product-slug=hanuman-fest-2026
+```
+
+Create links + send email to all generated:
+
+```bash
+php bin/console app:payment-links:generate --product-slug=hanuman-fest-2026 --send-email
+```
+
