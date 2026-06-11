@@ -19,7 +19,7 @@
 Перед подключением задайте константы в `wp-config.php`:
 
 ```php
-define('UAE_API_BASE', 'https://api.хануманфест.рф/api');
+define('UAE_API_BASE', 'https://апи.хануманфест.рф/api');
 define('UAE_PRODUCT_SLUG', 'hanuman-fest-2026');
 ```
 
@@ -61,7 +61,7 @@ URL в личном кабинете YooKassa **не меняйте** — ост
 Чтобы Symfony тоже получал уведомления, в `wp-config.php`:
 
 ```php
-define('UAE_SYMFONY_WEBHOOK_URL', 'https://api.хануманфест.рф/api/webhooks/yookassa');
+define('UAE_SYMFONY_WEBHOOK_URL', 'https://апи.хануманфест.рф/api/webhooks/yookassa');
 ```
 
 Подробнее: [`PARALLEL_TESTING.md`](../../PARALLEL_TESTING.md)

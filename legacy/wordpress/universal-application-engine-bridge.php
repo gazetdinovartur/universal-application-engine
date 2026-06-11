@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('UAE_API_BASE')) {
-    define('UAE_API_BASE', 'https://api.хануманфест.рф/api');
+    define('UAE_API_BASE', 'https://апи.хануманфест.рф/api');
 }
 
 if (!defined('UAE_PRODUCT_SLUG')) {

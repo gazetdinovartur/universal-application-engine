@@ -2,7 +2,7 @@
 
 ## 1. Prerequisites
 
-- Domain/subdomain: `api.хануманфест.рф`
+- Domain/subdomain: `апи.хануманфест.рф`
 - PHP: `8.2`
 - MySQL: `8.0` (DB: `cb15013_uae`)
 - Site root: `public/`
@@ -19,7 +19,7 @@ APP_SECRET=CHANGE_ME_LONG_RANDOM
 
 DATABASE_URL="mysql://DB_USER:DB_PASSWORD@127.0.0.1:3306/cb15013_uae?serverVersion=8.0&charset=utf8mb4"
 
-APP_URL="https://api.хануманфест.рф"
+APP_URL="https://апи.хануманфест.рф"
 FRONTEND_URL="https://хануманфест.рф"
 CORS_ALLOW_ORIGIN="https://хануманфест.рф"
 
@@ -63,7 +63,7 @@ chmod -R 775 var
 
 - Document root points to `public/`
 - PHP-FPM enabled for project
-- HTTPS certificate attached to `api.хануманфест.рф`
+- HTTPS certificate attached to `апи.хануманфест.рф`
 - Force redirect HTTP -> HTTPS
 
 ## 5. Smoke Test
@@ -71,8 +71,8 @@ chmod -R 775 var
 After deploy:
 
 ```bash
-curl -I https://api.хануманфест.рф/admin
-curl -s https://api.хануманфест.рф/api/products/hanuman-fest-2026
+curl -I https://апи.хануманфест.рф/admin
+curl -s https://апи.хануманфест.рф/api/products/hanuman-fest-2026
 ```
 
 Expected:
