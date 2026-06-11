@@ -14,7 +14,7 @@ final class AdminLoginTest extends WebTestCase
         $client->request('GET', '/admin/login');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Админка');
+        self::assertSelectorTextContains('body', 'Sign in');
     }
 
     public function testAdminRedirectsToLoginWhenAnonymous(): void

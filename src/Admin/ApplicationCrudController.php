@@ -8,10 +8,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ApplicationCrudController extends AbstractCrudController
 {
@@ -42,7 +41,10 @@ class ApplicationCrudController extends AbstractCrudController
             ])->setLabel('Статус');
         yield IntegerField::new('totalAmount')->setLabel('Итого (₽)');
         yield IntegerField::new('paidAmount')->setLabel('Оплачено (₽)');
-        yield CodeEditorField::new('payload')->setLabel('Данные формы')->onlyOnDetail();
+        yield TextField::new('payload')
+            ->setLabel('Данные формы')
+            ->onlyOnDetail()
+            ->formatValue(static fn ($value): string => json_encode($value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?: '{}');
         yield DateTimeField::new('createdAt')->setLabel('Создана')->hideOnForm();
         yield DateTimeField::new('updatedAt')->setLabel('Обновлена')->hideOnForm();
     }

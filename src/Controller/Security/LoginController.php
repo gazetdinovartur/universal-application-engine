@@ -16,9 +16,11 @@ class LoginController extends AbstractController
             return $this->redirectToRoute('admin');
         }
 
-        return $this->render('security/login.html.twig', [
-            'last_username' => $authenticationUtils->getLastUsername(),
+        return $this->render('@EasyAdmin/page/login.html.twig', [
             'error' => $authenticationUtils->getLastAuthenticationError(),
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'translation_domain' => 'messages',
+            'target_path' => $this->generateUrl('admin'),
         ]);
     }
 }
