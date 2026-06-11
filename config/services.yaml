@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.default_admin_password_hash: '$2y$12$4L1U3009ffceyxtaCcoh2efQx.XeY48u6iStryuZJsIfrOUGPjQp.'
+    app.admin_password_hash: '%env(default:app.default_admin_password_hash:ADMIN_PASSWORD_HASH)%'
     env(YOOKASSA_SHOP_ID): ''
     env(YOOKASSA_SECRET_KEY): ''
     env(GOOGLE_SHEETS_WEBHOOK_URL): ''

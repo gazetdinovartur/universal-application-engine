@@ -46,19 +46,24 @@ php -r "echo password_hash('YOUR_STRONG_PASSWORD', PASSWORD_BCRYPT), PHP_EOL;"
 Run in project root:
 
 ```bash
-composer install --no-dev --optimize-autoloader
-php bin/console doctrine:migrations:migrate --no-interaction
-php bin/console cache:clear --env=prod
-php bin/console cache:warmup --env=prod
-php bin/console assets:install public --no-interaction
+bash bin/deploy-prod.sh
 ```
 
-If needed for permissions:
+Or manually:
 
 ```bash
-mkdir -p var/cache var/log
+composer install --no-dev --optimize-autoloader
+mkdir -p var/cache var/log var/sessions/prod public/bundles
 chmod -R 775 var
+rm -f .env.local.php
+php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+rm -rf var/cache/prod
+php bin/console cache:clear --env=prod
+php bin/console cache:warmup --env=prod
+php bin/console assets:install public --no-interaction --env=prod
 ```
+
+If `.env.local.php` exists from an old `composer dump-env prod`, delete it. Symfony will read `.env.local` directly and avoid stale compiled env.
 
 ## 4. Web Server Checklist
 
@@ -73,15 +78,25 @@ After deploy:
 
 ```bash
 curl -I https://апи.хануманфест.рф/admin
+curl -s https://апи.хануманфест.рф/api/health
 curl -s https://апи.хануманфест.рф/api/products/hanuman-fest-2026
 ```
 
 Expected:
 
 - `/admin` redirects to `/admin/login` (form login, not HTTP Basic)
+- `/api/health` returns `{"status":"ok"}`
 - Product endpoint returns JSON with active period/options
 
-## 6. Rollback (quick)
+## 6. If you see HTTP 500
+
+1. Run `bash bin/deploy-prod.sh` again (clears stale cache and `.env.local.php`).
+2. Check `var/log/prod.log` — errors are logged there after Monolog is installed.
+3. Check Timeweb PHP error log in hosting panel.
+4. Verify `.env.local` has quoted bcrypt hash: `ADMIN_PASSWORD_HASH='$2y$12$...'`
+5. Verify `DATABASE_URL` password is URL-encoded if it contains `@`, `#`, `/`, etc.
+
+## 7. Rollback (quick)
 
 1. Checkout previous stable commit/tag
 2. `composer install --no-dev --optimize-autoloader`
