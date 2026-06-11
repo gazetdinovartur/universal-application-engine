@@ -22,5 +22,13 @@
 # Removed Vue frontend leftovers
 /frontend/
 
+# Local Composer phar (Timeweb: global composer is often v1)
+/composer2.phar
+/composer-setup.php
+/composer
+
+# Timeweb flat web root (assets:install .)
+/bundles/
+
 # Local legacy import data (not source code)
 /legacy/*.csv

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Use project-local Composer 2 phar (not global Composer 1 on shared hosting).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PHAR="${ROOT}/composer2.phar"
+
+if [[ ! -f "${PHAR}" ]]; then
+    echo "composer2.phar not found in ${ROOT}" >&2
+    echo "Download: php -r \"copy('https://getcomposer.org/installer', 'composer-setup.php');\"" >&2
+    echo "          php composer-setup.php --filename=composer2.phar --2" >&2
+    echo "          rm composer-setup.php" >&2
+    exit 1
+fi
+
+exec php "${PHAR}" "$@"

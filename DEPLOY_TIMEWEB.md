@@ -5,8 +5,28 @@
 - Domain/subdomain: `апи.хануманфест.рф`
 - PHP: `8.2`
 - MySQL: `8.0` (DB: `cb15013_uae`)
-- Site root: `public/`
-- Repository sync: GitHub (branch `main` or release branch)
+- **Project path on server:** `/home/c/cb15013/uae/public_html` (весь репозиторий, не родительская папка)
+- **Document root Timeweb:** `public_html` = корень Symfony (`index.php`, `bundles/`, `vendor/` рядом)
+- Repository sync: GitHub (branch `main`)
+
+### Структура на Timeweb (важно)
+
+```
+/home/c/cb15013/uae/public_html/
+├── index.php          ← вход сайта (не public/index.php)
+├── .htaccess
+├── composer.json
+├── composer2.phar     ← локальный Composer 2 (не глобальный v1)
+├── bin/composer       ← обёртка: php composer2.phar
+├── bundles/           ← assets:install .
+├── vendor/
+├── var/
+├── config/
+├── src/
+└── public/            ← для локальной разработки; на Timeweb не используется как docroot
+```
+
+Локально/Docker document root = `public/`. На Timeweb — корень `public_html`.
 
 ## 2. Environment Variables (`.env.local`)
 
@@ -43,34 +63,50 @@ php -r "echo password_hash('YOUR_STRONG_PASSWORD', PASSWORD_BCRYPT), PHP_EOL;"
 
 ## 3. Deploy Steps (after `git pull`)
 
-Run in project root:
+Run from **`/home/c/cb15013/uae/public_html`**:
 
 ```bash
+cd ~/uae/public_html
+git pull
 bash bin/deploy-prod.sh
 ```
+
+Deploy uses **`bin/composer`** → `composer2.phar` in project root (not global `composer` v1 on Timeweb).
+
+If `composer2.phar` is missing or older than 2.1:
+
+```bash
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php --filename=composer2.phar --2
+rm composer-setup.php
+php composer2.phar --version   # must be 2.1+
+```
+
+Optional: alias `composer='bash /path/to/project/bin/composer'` in `~/.bashrc`.
 
 Or manually:
 
 ```bash
-composer install --no-dev --optimize-autoloader
-mkdir -p var/cache var/log var/sessions/prod public/bundles
+bash bin/composer install --no-dev --optimize-autoloader
+mkdir -p var/cache var/log var/sessions/prod bundles
 chmod -R 775 var
 rm -f .env.local.php
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 rm -rf var/cache/prod
 php bin/console cache:clear --env=prod
 php bin/console cache:warmup --env=prod
-php bin/console assets:install public --no-interaction --env=prod
+php bin/console assets:install . --no-interaction --env=prod
 ```
 
 If `.env.local.php` exists from an old `composer dump-env prod`, delete it. Symfony will read `.env.local` directly and avoid stale compiled env.
 
 ## 4. Web Server Checklist
 
-- Document root points to `public/`
+- Document root = `public_html` (корень репозитория, см. `index.php` и `.htaccess` в корне)
 - PHP-FPM enabled for project
 - HTTPS certificate attached to `апи.хануманфест.рф`
 - Force redirect HTTP -> HTTPS
+- `.htaccess` блокирует прямой доступ к `vendor/`, `var/`, `config/`, `bin/`
 
 ## 5. Smoke Test
 
@@ -99,7 +135,7 @@ Expected:
 ## 7. Rollback (quick)
 
 1. Checkout previous stable commit/tag
-2. `composer install --no-dev --optimize-autoloader`
+2. `bash bin/composer install --no-dev --optimize-autoloader`
 3. `php bin/console cache:clear --env=prod`
 4. Run DB rollback only if a migration requires it
 

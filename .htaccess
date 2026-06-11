@@ -1,0 +1,33 @@
+DirectoryIndex index.php
+
+# Block direct HTTP access to application internals (flat public_html layout).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(?:vendor|var|config|bin|migrations|src|templates|tests|legacy|docker|build)(?:/|$) - [F,L]
+    RewriteRule ^\.env - [F,L]
+    RewriteRule ^composer(?:2)?\.phar$ - [F,L]
+    RewriteRule ^composer\.(?:json|lock)$ - [F,L]
+</IfModule>
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+    RewriteRule .* - [E=BASE:%1]
+
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ %{ENV:BASE}/index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        RedirectMatch 307 ^/$ /index.php/
+    </IfModule>
+</IfModule>
