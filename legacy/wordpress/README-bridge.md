@@ -1,6 +1,8 @@
 # Universal Application Engine Bridge for WordPress
 
-Этот bridge плагин встраивает новый Symfony API в существующий WordPress сайт на Bootstrap 5.
+Полная документация проекта: [`../../README.md`](../../README.md)
+
+Этот bridge-плагин встраивает Symfony API в WordPress-сайт на Bootstrap 5.
 
 ## 1) Установка
 

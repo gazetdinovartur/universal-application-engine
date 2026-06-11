@@ -1,0 +1,6 @@
+services:
+    _defaults:
+        public: true
+
+    App\Infrastructure\Yookassa\YookassaClient:
+        synthetic: true

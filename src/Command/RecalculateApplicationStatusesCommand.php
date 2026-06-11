@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Application;
+use App\Entity\Payment;
 use App\Enum\ApplicationStatus;
 use App\Enum\PaymentStatus;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,9 +39,7 @@ class RecalculateApplicationStatusesCommand extends Command
         $dryRun = (bool) $input->getOption('dry-run');
         $productSlug = (string) $input->getOption('product-slug');
 
-        $qb = $this->entityManager->getRepository(Application::class)->createQueryBuilder('a')
-            ->leftJoin('a.payments', 'pay')
-            ->addSelect('pay');
+        $qb = $this->entityManager->getRepository(Application::class)->createQueryBuilder('a');
 
         if ($productSlug !== '') {
             $qb
@@ -59,12 +58,7 @@ class RecalculateApplicationStatusesCommand extends Command
 
         $changed = 0;
         foreach ($applications as $application) {
-            $succeededTotal = 0;
-            foreach ($application->getPayments() as $payment) {
-                if ($payment->getStatus() === PaymentStatus::Succeeded) {
-                    $succeededTotal += max(0, $payment->getAmount());
-                }
-            }
+            $succeededTotal = $this->sumSucceededPayments($application);
 
             $currentPaid = max(0, $application->getPaidAmount());
             $newPaid = max($currentPaid, $succeededTotal);
@@ -108,5 +102,20 @@ class RecalculateApplicationStatusesCommand extends Command
         }
 
         return ApplicationStatus::New;
+    }
+
+    private function sumSucceededPayments(Application $application): int
+    {
+        $total = $this->entityManager->createQueryBuilder()
+            ->select('COALESCE(SUM(p.amount), 0)')
+            ->from(Payment::class, 'p')
+            ->where('p.application = :application')
+            ->andWhere('p.status = :status')
+            ->setParameter('application', $application)
+            ->setParameter('status', PaymentStatus::Succeeded)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return max(0, (int) $total);
     }
 }

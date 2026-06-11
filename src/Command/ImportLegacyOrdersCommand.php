@@ -321,7 +321,7 @@ class ImportLegacyOrdersCommand extends Command
         fwrite($stream, $content);
         rewind($stream);
 
-        $headers = fgetcsv($stream, 0, $delimiter);
+        $headers = fgetcsv($stream, 0, $delimiter, '"', '');
         if (!is_array($headers)) {
             fclose($stream);
 
@@ -341,7 +341,7 @@ class ImportLegacyOrdersCommand extends Command
         }
 
         $rows = [];
-        while (($cols = fgetcsv($stream, 0, $delimiter)) !== false) {
+        while (($cols = fgetcsv($stream, 0, $delimiter, '"', '')) !== false) {
             $row = [];
             foreach ($headerKeys as $idx => $key) {
                 $row[$key] = isset($cols[$idx]) ? trim((string) $cols[$idx]) : '';

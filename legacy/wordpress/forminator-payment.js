@@ -1,5 +1,5 @@
 /**
- * @deprecated Будет заменён Vue 3 формой.
+ * @deprecated Заменён WordPress bridge (uae-bridge.js) + Symfony API.
  * Оригинальный скрипт интеграции Forminator → YooKassa (WordPress).
  */
 (function () {

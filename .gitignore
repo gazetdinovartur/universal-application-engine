@@ -10,5 +10,7 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-/frontend/node_modules/
-/public/frontend/
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
