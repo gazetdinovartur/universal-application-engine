@@ -54,3 +54,15 @@ define('UAE_PRODUCT_SLUG', 'hanuman-fest-2026');
 - В API переменная `FRONTEND_URL` должна указывать на основной сайт:
   - `FRONTEND_URL=https://хануманфест.рф`
 
+## 6) Webhook YooKassa (параллельный тест)
+
+URL в личном кабинете YooKassa **не меняйте** — оставьте WordPress.
+
+Чтобы Symfony тоже получал уведомления, в `wp-config.php`:
+
+```php
+define('UAE_SYMFONY_WEBHOOK_URL', 'https://api.хануманфест.рф/api/webhooks/yookassa');
+```
+
+Подробнее: [`PARALLEL_TESTING.md`](../../PARALLEL_TESTING.md)
+

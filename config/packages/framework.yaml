@@ -8,6 +8,12 @@ framework:
     #esi: true
     #fragments: true
 
+when@prod:
+    framework:
+        session:
+            cookie_secure: auto
+            cookie_samesite: lax
+
 when@test:
     framework:
         test: true

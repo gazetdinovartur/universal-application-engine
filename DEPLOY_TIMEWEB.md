@@ -77,7 +77,7 @@ curl -s https://api.хануманфест.рф/api/products/hanuman-fest-2026
 
 Expected:
 
-- `/admin` asks for credentials (HTTP Basic)
+- `/admin` redirects to `/admin/login` (form login, not HTTP Basic)
 - Product endpoint returns JSON with active period/options
 
 ## 6. Rollback (quick)

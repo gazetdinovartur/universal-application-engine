@@ -129,7 +129,8 @@ class PaymentService
         );
 
         if (!$payment) {
-            throw new NotFoundHttpException('Payment not found');
+            // Платёж создан старой системой (WordPress) — игнорируем, отвечаем ok.
+            return;
         }
 
         if ($status === 'succeeded') {

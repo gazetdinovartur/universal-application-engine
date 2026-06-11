@@ -14,3 +14,13 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+# OS / IDE
+.DS_Store
+.idea/
+
+# Removed Vue frontend leftovers
+/frontend/
+
+# Local legacy import data (not source code)
+/legacy/*.csv

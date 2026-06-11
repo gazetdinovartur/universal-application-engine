@@ -302,13 +302,19 @@ php bin/console app:payment-links:generate --product-slug=hanuman-fest-2026
 
 ## Админка
 
-URL: `/admin` (HTTP Basic Auth)
+URL: `/admin` — **форма входа с сессией** (не HTTP Basic).
 
-Локально по умолчанию: логин `admin`, пароль `TempAdmin!2026` (см. `config/packages/security.yaml`). **На production обязательно задайте `ADMIN_PASSWORD_HASH`.**
+- Страница входа: `/admin/login`
+- Локально: логин `admin`, пароль `TempAdmin!2026`
+- Production: задайте `ADMIN_PASSWORD_HASH` (bcrypt)
 
-Разделы: заявки, платежи, пользователи, проекты, периоды цен (с редактором матрицы цен), варианты участия.
+Разделы: заявки, платежи, пользователи, проекты, периоды цен, варианты участия.
 
-Операции импорта, payment links и sync Sheets — только через CLI, не из админки.
+Операции импорта, payment links и sync Sheets — через CLI.
+
+### Параллельный тест на живом сайте
+
+См. [`PARALLEL_TESTING.md`](PARALLEL_TESTING.md) — secret-страницы WP, отдельный Google Sheet, forward webhook без смены URL в YooKassa.
 
 ---
 
@@ -359,6 +365,7 @@ php bin/phpunit
 |------|------------|
 | [`DEPLOY_TIMEWEB.md`](DEPLOY_TIMEWEB.md) | Деплой на Timeweb, env, smoke tests |
 | [`IMPORT_LEGACY_ORDERS.md`](IMPORT_LEGACY_ORDERS.md) | Импорт CSV, recalc, payment links |
+| [`PARALLEL_TESTING.md`](PARALLEL_TESTING.md) | Тестовый контур на живом сайте без остановки боевой регистрации |
 | [`legacy/wordpress/README-bridge.md`](legacy/wordpress/README-bridge.md) | Bridge: shortcode, rewrite, конфиг |
 
 ---

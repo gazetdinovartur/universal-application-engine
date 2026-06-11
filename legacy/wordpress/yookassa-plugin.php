@@ -146,8 +146,26 @@ add_action('rest_api_init', function () {
     ]);
 });
 
+function yk_forward_to_symfony_if_configured(string $rawBody): void
+{
+    if (!defined('UAE_SYMFONY_WEBHOOK_URL') || UAE_SYMFONY_WEBHOOK_URL === '') {
+        return;
+    }
+
+    wp_remote_post(UAE_SYMFONY_WEBHOOK_URL, [
+        'headers' => [
+            'Content-Type' => 'application/json',
+        ],
+        'body' => $rawBody,
+        'timeout' => 15,
+        'blocking' => false,
+    ]);
+}
+
 function yk_webhook(WP_REST_Request $request)
 {
+    yk_forward_to_symfony_if_configured($request->get_body());
+
     global $wpdb;
     $data = $request->get_json_params();
 
