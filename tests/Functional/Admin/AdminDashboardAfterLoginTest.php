@@ -13,6 +13,7 @@ final class AdminDashboardAfterLoginTest extends WebTestCase
         $client = static::createClient();
         $crawler = $client->request('GET', '/admin/login');
         self::assertResponseIsSuccessful();
+        self::assertGreaterThan(0, $crawler->filter('input[name="_csrf_token"]')->count());
 
         $form = $crawler->selectButton('Sign in')->form([
             '_username' => 'admin',

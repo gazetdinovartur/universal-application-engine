@@ -20,7 +20,9 @@ class LoginController extends AbstractController
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
             'translation_domain' => 'messages',
+            'action' => $this->generateUrl('admin_login'),
             'target_path' => $this->generateUrl('admin_application_index'),
+            'csrf_token_intention' => 'authenticate',
         ]);
     }
 }
