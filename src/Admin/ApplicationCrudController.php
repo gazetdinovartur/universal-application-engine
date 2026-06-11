@@ -10,7 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -31,10 +30,8 @@ class ApplicationCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id')->hideOnForm();
         yield TextField::new('uuid')->setLabel('UUID')->hideOnForm();
         yield AssociationField::new('user')->setLabel('Пользователь');
-        yield AssociationField::new('product')->setLabel('Проект');
         yield AssociationField::new('pricingPeriod')->setLabel('Период стоимости');
         yield ChoiceField::new('status')
             ->setChoices([

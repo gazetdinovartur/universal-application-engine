@@ -196,10 +196,13 @@ class ImportLegacyOrdersCommand extends Command
             $application = $this->findOrCreateApplication($legacyUuid, $email, $user, $product);
             $isNewApp = null === $application->getId();
 
-            $totalAmount = max(0, (int) $record['totalAmount']);
+            $importedTotalAmount = max(0, (int) $record['totalAmount']);
             $payNowAmount = max(0, (int) $record['payNowAmount']);
             $paidTotal = max(0, (int) $record['paidTotal']);
             $paymentsTotal = 0;
+
+            $currentTotalAmount = max(0, $application->getTotalAmount());
+            $totalAmount = $this->resolveTotalAmount($currentTotalAmount, $importedTotalAmount, $paidTotal, $payNowAmount);
 
             $application->setUser($user);
             $application->setProduct($product);
@@ -256,7 +259,7 @@ class ImportLegacyOrdersCommand extends Command
                 $paymentsTotal += $amount;
             }
 
-            $finalPaid = max($paidTotal, $paymentsTotal);
+            $finalPaid = max($application->getPaidAmount(), $paidTotal, $paymentsTotal);
             if ($totalAmount > 0) {
                 $finalPaid = min($finalPaid, $totalAmount);
             }
@@ -598,6 +601,21 @@ class ImportLegacyOrdersCommand extends Command
         return $value;
     }
 
+    private function resolveTotalAmount(int $currentTotal, int $importedTotal, int $paidTotal, int $payNowAmount): int
+    {
+        if ($importedTotal > 0) {
+            return max($currentTotal, $importedTotal);
+        }
+
+        if ($currentTotal > 0) {
+            // Never downgrade already known total from "second payment" rows where total=0.
+            return $currentTotal;
+        }
+
+        // Fallback for rows that have no explicit total but contain payment data.
+        return max($paidTotal, $payNowAmount, 0);
+    }
+
     private function normalizeEmail(string $email): string
     {
         return mb_strtolower(trim($email));
@@ -860,9 +878,8 @@ class ImportLegacyOrdersCommand extends Command
         $email = mb_strtolower(trim((string) ($record['email'] ?? '')));
         $phone = PhoneNormalizer::toDigits((string) ($record['phone'] ?? ''));
         $option = $this->normalizeText((string) ($record['participationOptionName'] ?? ''));
-        $total = (int) ($record['totalAmount'] ?? 0);
 
-        return 'fp:'.sha1($email.'|'.$phone.'|'.$option.'|'.$total);
+        return 'fp:'.sha1($email.'|'.$phone.'|'.$option);
     }
 
     /**

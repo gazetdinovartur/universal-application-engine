@@ -43,7 +43,16 @@ Notes:
 - It supports historical option aliases like `Только воскресение`, `Только суббота`, `С пятницы на субботу`, `С субботы на воскресение`.
 - Rows with `Вариант участия = Полный` are intentionally skipped (ambiguous legacy meaning for 2026 model) and should be reviewed manually.
 
-## 3) Generate links for second payment (50% cases)
+## 3) Recalculate paid amounts and statuses
+
+If legacy data was imported in several passes, run status reconciliation:
+
+```bash
+php bin/console app:applications:recalculate-statuses --product-slug=hanuman-fest-2026 --dry-run
+php bin/console app:applications:recalculate-statuses --product-slug=hanuman-fest-2026
+```
+
+## 4) Generate links for second payment (50% cases)
 
 Dry run:
 
