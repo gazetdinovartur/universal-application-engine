@@ -126,8 +126,8 @@ php bin/console app:seed:hanuman-fest   # один раз
 Smoke test:
 
 ```bash
-curl -I https://api.хануманфест.рф/admin
-curl -s https://api.хануманфест.рф/api/products/hanuman-fest-2026
+curl -I https://апи.хануманфест.рф/admin
+curl -s https://апи.хануманфест.рф/api/products/hanuman-fest-2026
 ```
 
 ---
@@ -138,12 +138,12 @@ curl -s https://api.хануманфест.рф/api/products/hanuman-fest-2026
 
 ### Шаг 1. Развернуть Symfony API
 
-- Домен API: `https://api.хануманфест.рф`
+- Домен API: `https://апи.хануманфест.рф`
 - SSL обязателен
 - В `.env.local` на хостинге:
 
 ```dotenv
-APP_URL="https://api.хануманфест.рф"
+APP_URL="https://апи.хануманфест.рф"
 FRONTEND_URL="https://хануманфест.рф"
 CORS_ALLOW_ORIGIN="https://хануманфест.рф"
 YOOKASSA_SHOP_ID=...
@@ -153,7 +153,7 @@ MAILER_DSN=smtp://...
 ADMIN_PASSWORD_HASH='$2y$12$...'   # php -r "echo password_hash('YOUR_PASSWORD', PASSWORD_BCRYPT), PHP_EOL;"
 ```
 
-- В личном кабинете YooKassa webhook: `POST https://api.хануманфест.рф/api/webhooks/yookassa`
+- В личном кабинете YooKassa webhook: `POST https://апи.хануманфест.рф/api/webhooks/yookassa`
 
 ### Шаг 2. Установить bridge-плагин
 
@@ -178,7 +178,7 @@ wp-content/plugins/uae-bridge/
 ### Шаг 3. Конфигурация в `wp-config.php`
 
 ```php
-define('UAE_API_BASE', 'https://api.хануманфест.рф/api');
+define('UAE_API_BASE', 'https://апи.хануманфест.рф/api');
 define('UAE_PRODUCT_SLUG', 'hanuman-fest-2026');
 ```
 
@@ -228,7 +228,7 @@ define('UAE_PRODUCT_SLUG', 'hanuman-fest-2026');
 Пример расчёта:
 
 ```bash
-curl -s -X POST https://api.хануманфест.рф/api/calculate \
+curl -s -X POST https://апи.хануманфест.рф/api/calculate \
   -H 'Content-Type: application/json' \
   -d '{
     "productSlug": "hanuman-fest-2026",
