@@ -32,3 +32,5 @@
 
 # Local legacy import data (not source code)
 /legacy/*.csv
+/meta
+/hanumanfest

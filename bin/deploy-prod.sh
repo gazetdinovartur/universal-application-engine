@@ -27,7 +27,7 @@ if [[ ! -f "${ROOT}/composer2.phar" ]]; then
 fi
 
 if ! composer_version_ok; then
-    echo "Composer 2.1+ required (Symfony 7.4). Current:"
+    echo "Composer 2.1+ required (Symfony 8). Current:"
     "${COMPOSER}" --version 2>/dev/null || true
     echo "Update phar: php composer2.phar self-update --2"
     exit 1

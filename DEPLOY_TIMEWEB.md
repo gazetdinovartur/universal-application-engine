@@ -3,7 +3,7 @@
 ## 1. Prerequisites
 
 - Domain/subdomain: `апи.хануманфест.рф`
-- PHP: `8.2`
+- PHP: `8.5`
 - MySQL: `8.0` (DB: `cb15013_uae`)
 - **Project path on server:** `/home/c/cb15013/uae/public_html` (весь репозиторий, не родительская папка)
 - **Document root Timeweb:** `public_html` = корень Symfony (`index.php`, `bundles/`, `vendor/` рядом)

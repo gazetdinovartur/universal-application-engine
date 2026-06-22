@@ -2,7 +2,8 @@
   'use strict';
 
   const config = window.uaeBridgeConfig || {};
-  const apiBase = (config.apiBase || '').replace(/\/$/, '');
+  const DEFAULT_API_BASE = 'https://апи.хануманфест.рф/api';
+  const apiBase = (config.apiBase || DEFAULT_API_BASE).replace(/\/$/, '');
 
   if (!apiBase) {
     return;

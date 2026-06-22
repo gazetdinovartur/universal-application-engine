@@ -55,7 +55,7 @@ Backend для регистрации и оплаты участия в фест
 ### Требования
 
 - Docker + Docker Compose
-- PHP 8.2+ (если без Docker)
+- PHP 8.5+ (если без Docker)
 - MySQL 8.0
 
 ### Docker
@@ -81,7 +81,12 @@ curl -s http://localhost:8080/api/products/hanuman-fest-2026 | jq .
 
 ### Переменные окружения
 
-Скопируйте и настройте `.env.local` (не коммитится):
+Production-домены (см. `.env.example`):
+
+- API: `https://апи.хануманфест.рф`
+- Сайт: `https://хануманфест.рф`
+
+Для **локального Docker** переопределите в `.env.local` (шаблон — `.env.local.example`):
 
 ```dotenv
 APP_SECRET=change-me
@@ -90,19 +95,11 @@ DATABASE_URL="mysql://app:!ChangeMe!@database:3306/app?serverVersion=8.0&charset
 APP_URL=http://localhost:8080
 FRONTEND_URL=http://localhost:8080
 CORS_ALLOW_ORIGIN=http://localhost:8080
-
-YOOKASSA_SHOP_ID=
-YOOKASSA_SECRET_KEY=
-GOOGLE_SHEETS_WEBHOOK_URL=
-
-MAILER_DSN=null://null
-MAILER_FROM=noreply@example.com
-MAILER_FROM_NAME="Hanuman Fest"
 ```
 
 | Переменная | Назначение |
 |------------|------------|
-| `APP_URL` | URL Symfony API |
+| `APP_URL` | URL Symfony API (`https://апи.хануманфест.рф`) |
 | `FRONTEND_URL` | URL основного сайта (WordPress) — return URL YooKassa и ссылки `/pay/{token}` в письмах |
 | `CORS_ALLOW_ORIGIN` | Origin WordPress-сайта для браузерных запросов bridge |
 | `GOOGLE_SHEETS_WEBHOOK_URL` | URL развёрнутого Google Apps Script (пусто = экспорт отключён) |
@@ -372,7 +369,7 @@ php bin/phpunit
 
 ## Стек
 
-- PHP 8.2+, Symfony 7.4, Doctrine ORM 3, EasyAdmin 5
+- PHP 8.5+, Symfony 8.0, Doctrine ORM 3, EasyAdmin 5
 - MySQL 8.0
 - YooKassa REST API
 - WordPress bridge: Bootstrap 5 + vanilla JS

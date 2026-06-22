@@ -18,6 +18,7 @@ parameters:
     env(MAILER_FROM_NAME): 'Hanuman Fest'
     env(CORS_ALLOW_ORIGIN): '*'
     env(MAILER_DSN): 'null://null'
+    env(SCHEDULE_SHEET_URL): ''
 
 services:
     # default configuration for services in *this* file
@@ -49,3 +50,7 @@ services:
     App\EventListener\CorsListener:
         arguments:
             $allowOrigin: '%env(CORS_ALLOW_ORIGIN)%'
+
+    App\Command\ImportScheduleCommand:
+        arguments:
+            $defaultSourceUrl: '%env(SCHEDULE_SHEET_URL)%'
